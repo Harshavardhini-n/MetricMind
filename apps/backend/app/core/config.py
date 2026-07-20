@@ -11,8 +11,8 @@ class Settings(BaseSettings):
 
     ENVIRONMENT: str = "development"
 
-    OLLAMA_BASE_URL: str = "http://localhost:11434"
-    OLLAMA_MODEL: str = "llama3"
+   OLLAMA_MODEL: str = "llama3"
+OLLAMA_HOST: str = "http://localhost:11434"
 
     CUBE_API_URL: str = ""
     CUBE_API_TOKEN: str = ""
