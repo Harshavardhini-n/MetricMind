@@ -1,22 +1,9 @@
 from fastapi import APIRouter
-from app.core.config import settings
+
+from app.api.v1.chat import router as chat_router
+from app.api.v1.health import router as health_router
 
 router = APIRouter()
 
-
-@router.get(
-    "/health",
-    tags=["Health"],
-    summary="Health Check",
-    description="Returns application health status.",
-)
-async def health():
-    return {
-        "success": True,
-        "data": {
-            "status": "healthy",
-            "environment": settings.ENVIRONMENT,
-            "version": settings.APP_VERSION,
-        },
-        "message": "MetricMind API is running",
-    }
+router.include_router(health_router)
+router.include_router(chat_router)
