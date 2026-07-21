@@ -1,18 +1,17 @@
-from ollama import chat
-from app.core.config import settings
+from app.agent.chain import create_chain
 
-class OllamaService:from app.core.config import settings
+
+class OllamaService:
 
     @staticmethod
     def generate_response(prompt: str) -> str:
-        response = chat(
-            model=settings.OLLAMA_MODEL,
-            messages=[
-                {
-                    "role": "user",
-                    "content": prompt,
-                }
-            ],
+
+        chain = create_chain()
+
+        response = chain.invoke(
+            {
+                "question": prompt
+            }
         )
 
-        return response["message"]["content"]
+        return response.content
