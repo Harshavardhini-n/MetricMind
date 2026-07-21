@@ -3,18 +3,23 @@ from app.tools.semantic_tool import SemanticTool
 
 class Executor:
 
-    @staticmethod
-    def execute(tool: str, question: str):
+    METRICS = {
+        "revenue": "revenue",
+        "margin": "margin",
+        "profit": "profit",
+        "cost": "cost",
+    }
 
-        if tool == "semantic":
+    @classmethod
+    def execute(cls, tool: str, question: str):
 
-            if "revenue" in question.lower():
-                return SemanticTool.query_metric("revenue")
+        if tool != "semantic":
+            return None
 
-            if "margin" in question.lower():
-                return SemanticTool.query_metric("margin")
+        question = question.lower()
 
-            if "profit" in question.lower():
-                return SemanticTool.query_metric("profit")
+        for keyword, metric in cls.METRICS.items():
+            if keyword in question:
+                return SemanticTool.query_metric(metric)
 
         return None
