@@ -1,17 +1,24 @@
 class Planner:
     
-    @staticmethod
-    def choose_tool(question: str):
+    TOOL_KEYWORDS = {
+        "semantic": [
+            "revenue",
+            "margin",
+            "profit",
+            "cost",
+        ]
+    }
+
+    @classmethod
+    def choose_tool(cls, question: str):
 
         question = question.lower()
 
-        if "revenue" in question:
-            return "semantic"
+        for tool, keywords in cls.TOOL_KEYWORDS.items():
 
-        if "margin" in question:
-            return "semantic"
+            for keyword in keywords:
 
-        if "profit" in question:
-            return "semantic"
+                if keyword in question:
+                    return tool
 
-        return "chat"
+        return None

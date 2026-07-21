@@ -1,8 +1,8 @@
-from app.tools.semantic_tool import SemanticTool
+from app.registry.tool_registry import ToolRegistry
 
 
 class Executor:
-
+    
     METRICS = {
         "revenue": "revenue",
         "margin": "margin",
@@ -11,15 +11,18 @@ class Executor:
     }
 
     @classmethod
-    def execute(cls, tool: str, question: str):
+    def execute(cls, tool_name: str, question: str):
 
-        if tool != "semantic":
+        tool = ToolRegistry.get_tool(tool_name)
+
+        if tool is None:
             return None
 
         question = question.lower()
 
         for keyword, metric in cls.METRICS.items():
+
             if keyword in question:
-                return SemanticTool.query_metric(metric)
+                return tool.query_metric(metric)
 
         return None
