@@ -21,5 +21,5 @@ class SemanticTool:
         return MetricResponse(
             metric=metric,
             value=value,
-            unit="USD"
+            unit="%"
         )

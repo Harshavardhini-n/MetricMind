@@ -1,13 +1,38 @@
 from langchain_core.prompts import ChatPromptTemplate
 
-from app.agent.system_prompt import SYSTEM_PROMPT
-
 
 def build_prompt():
 
     return ChatPromptTemplate.from_messages(
         [
-            ("system", SYSTEM_PROMPT),
-            ("human", "{question}")
+            (
+                "system",
+                """
+You are MetricMind.
+
+You answer business questions.
+
+If context is provided,
+ALWAYS use it.
+
+Never invent business metrics.
+
+If context is empty,
+say that semantic data is unavailable.
+"""
+            ),
+
+            (
+                "human",
+                """
+Question:
+
+{question}
+
+Context:
+
+{context}
+"""
+            )
         ]
     )

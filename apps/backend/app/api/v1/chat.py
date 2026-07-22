@@ -1,7 +1,7 @@
 from fastapi import APIRouter
 
 from app.schemas.chat import ChatRequest, ChatResponse
-from app.services.ollama_service import OllamaService
+from app.services.agent_service import AgentService
 
 router = APIRouter(
     prefix="/chat",
@@ -16,6 +16,6 @@ router = APIRouter(
 )
 async def chat(request: ChatRequest):
 
-    answer = OllamaService.generate_response(request.message)
+    answer = AgentService.ask(request.message)
 
     return ChatResponse(response=answer)
