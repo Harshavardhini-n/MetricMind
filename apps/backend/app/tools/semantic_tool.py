@@ -1,25 +1,22 @@
+from app.catalog.metrics import METRICS
 from app.models.semantic import MetricResponse
 
 
 class SemanticTool:
 
-    MOCK_DATA = {
-        "revenue": 1850000,
-        "margin": 32.4,
-        "cost": 1250000,
-        "profit": 600000,
-    }
-
     @classmethod
     def query_metric(cls, metric: str):
 
-        value = cls.MOCK_DATA.get(metric.lower())
+        metric = metric.lower()
 
-        if value is None:
+        if metric not in METRICS:
             return None
+
+        data = METRICS[metric]
 
         return MetricResponse(
             metric=metric,
-            value=value,
-            unit="%"
+            value=data["value"],
+            unit=data["unit"],
+            description=data["description"]
         )

@@ -8,7 +8,9 @@ class MetricRequest(BaseModel):
 
 
 class MetricResponse(BaseModel):
+    
     metric: str
     value: float
     unit: str
+    description: str | None = None
     dimension: str | None = None
