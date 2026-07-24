@@ -16,6 +16,12 @@ class Executor:
         "asia",
     ]
 
+    PERIODS = [
+        "q1",
+        "q2",
+        "q3",
+        "q4",
+    ]
     @classmethod
     def execute(cls, tool, question):
 
@@ -29,7 +35,13 @@ class Executor:
                 break
 
         tool_class = ToolRegistry.get_tool(tool)
+        period = None
 
+        for p in cls.PERIODS:
+
+            if p in question:
+                period = p
+                break
         if not tool_class:
             return None
 
@@ -37,7 +49,8 @@ class Executor:
             if metric in question:
                 return tool_class.query_metric(
                     metric,
-                    dimension
+                    dimension,
+                    period
                 )
 
         return None

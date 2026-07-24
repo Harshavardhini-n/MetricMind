@@ -5,7 +5,7 @@ from app.models.semantic import MetricResponse
 class SemanticTool:
 
     @classmethod
-    def query_metric(cls, metric, dimension=None):
+    def query_metric(cls, metric, dimension=None, period=None):
 
         metric = metric.lower()
 
@@ -14,18 +14,36 @@ class SemanticTool:
 
         info = METRICS[metric]
 
+        data = info["dimensions"]
+
         if dimension:
 
             dimension = dimension.lower()
 
-            if dimension not in info["dimensions"]:
+            if dimension not in data:
                 return None
 
-            value = info["dimensions"][dimension]
+            region = data[dimension]
+
+            if period:
+
+                period = period.lower()
+
+                if period not in region:
+                    return None
+
+                value = region[period]
+
+            else:
+
+                value = sum(region.values())
 
         else:
 
-            value = sum(info["dimensions"].values())
+            value = 0
+
+            for region in data.values():
+                value += sum(region.values())
 
         return MetricResponse(
             metric=metric,
@@ -33,4 +51,5 @@ class SemanticTool:
             unit=info["unit"],
             description=info["description"],
             dimension=dimension,
+            period=period,
         )

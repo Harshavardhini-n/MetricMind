@@ -14,3 +14,4 @@ class MetricResponse(BaseModel):
     unit: str
     description: str | None = None
     dimension: str | None = None
+    period: str | None = None

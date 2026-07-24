@@ -32,6 +32,9 @@ Description:
 Dimension:
 {result.dimension or "All Regions"}
 
+Period:
+{result.period or "Full Year"}
+
 Value:
 {result.value}
 
