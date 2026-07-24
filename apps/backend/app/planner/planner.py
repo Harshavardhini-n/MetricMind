@@ -22,3 +22,16 @@ class Planner:
                     return tool
 
         return None
+    @classmethod
+    def is_comparison(cls, question):
+
+        question = question.lower()
+
+        comparison_words = [
+            "compare",
+            "highest",
+            "lowest",
+            "by region",
+        ]
+
+        return any(word in question for word in comparison_words)

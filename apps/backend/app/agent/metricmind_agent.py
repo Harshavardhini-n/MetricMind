@@ -12,15 +12,39 @@ class MetricMindAgent:
 
         tool = Planner.choose_tool(question)
 
+        comparison = Planner.is_comparison(question)
+
         context = ""
 
         if tool:
 
-            result = Executor.execute(tool, question)
+            if comparison:
+                result = Executor.compare(tool, question)
+            else:
+                result = Executor.execute(tool, question)
 
             if result:
 
-                context = f"""
+                if comparison:
+
+                    lines = []
+
+                    for region, value in result.values.items():
+                        lines.append(f"{region}: {value} {result.unit}")
+
+                    context = f"""
+Business Comparison
+
+Metric:
+{result.metric}
+
+Values:
+{chr(10).join(lines)}
+"""
+
+                else:
+
+                    context = f"""
 Business Metric
 
 Metric:

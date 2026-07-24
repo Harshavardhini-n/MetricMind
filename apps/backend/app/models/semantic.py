@@ -15,3 +15,7 @@ class MetricResponse(BaseModel):
     description: str | None = None
     dimension: str | None = None
     period: str | None = None
+class ComparisonResponse(BaseModel):
+    metric: str
+    unit: str
+    values: dict[str, float]

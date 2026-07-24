@@ -22,35 +22,52 @@ class Executor:
         "q3",
         "q4",
     ]
+
     @classmethod
     def execute(cls, tool, question):
+
+        tool_class = ToolRegistry.get_tool(tool)
+
+        if not tool_class:
+            return None
 
         question = question.lower()
 
         dimension = None
+        period = None
 
         for d in cls.DIMENSIONS:
             if d in question:
                 dimension = d
                 break
 
-        tool_class = ToolRegistry.get_tool(tool)
-        period = None
-
         for p in cls.PERIODS:
-
             if p in question:
                 period = p
                 break
-        if not tool_class:
-            return None
 
         for metric in cls.METRICS:
             if metric in question:
                 return tool_class.query_metric(
                     metric,
                     dimension,
-                    period
+                    period,
                 )
+
+        return None
+
+    @classmethod
+    def compare(cls, tool, question):
+
+        tool_class = ToolRegistry.get_tool(tool)
+
+        if not tool_class:
+            return None
+
+        question = question.lower()
+
+        for metric in cls.METRICS:
+            if metric in question:
+                return tool_class.compare_metric(metric)
 
         return None
