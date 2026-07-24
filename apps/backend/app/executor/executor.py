@@ -2,7 +2,7 @@ from app.registry.tool_registry import ToolRegistry
 
 
 class Executor:
-    
+
     METRICS = {
         "revenue": "revenue",
         "margin": "margin",
@@ -10,19 +10,34 @@ class Executor:
         "cost": "cost",
     }
 
+    DIMENSIONS = [
+        "north america",
+        "europe",
+        "asia",
+    ]
+
     @classmethod
-    def execute(cls, tool_name: str, question: str):
-
-        tool = ToolRegistry.get_tool(tool_name)
-
-        if tool is None:
-            return None
+    def execute(cls, tool, question):
 
         question = question.lower()
 
-        for keyword, metric in cls.METRICS.items():
+        dimension = None
 
-            if keyword in question:
-                return tool.query_metric(metric)
+        for d in cls.DIMENSIONS:
+            if d in question:
+                dimension = d
+                break
+
+        tool_class = ToolRegistry.get_tool(tool)
+
+        if not tool_class:
+            return None
+
+        for metric in cls.METRICS:
+            if metric in question:
+                return tool_class.query_metric(
+                    metric,
+                    dimension
+                )
 
         return None

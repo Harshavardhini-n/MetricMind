@@ -21,13 +21,22 @@ class MetricMindAgent:
             if result:
 
                 context = f"""
-Metric Information
+Business Metric
 
-Metric : {result.metric}
+Metric:
+{result.metric}
 
-Value : {result.value}
+Description:
+{result.description}
 
-Unit : {result.unit}
+Dimension:
+{result.dimension or "All Regions"}
+
+Value:
+{result.value}
+
+Unit:
+{result.unit}
 """
 
         response = self.chain.invoke(
