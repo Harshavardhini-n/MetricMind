@@ -1,5 +1,5 @@
 from app.registry.tool_registry import ToolRegistry
-
+from app.catalog.catalog import SemanticCatalog
 
 class Executor:
 
@@ -9,12 +9,6 @@ class Executor:
         "profit": "profit",
         "cost": "cost",
     }
-
-    DIMENSIONS = [
-        "north america",
-        "europe",
-        "asia",
-    ]
 
     PERIODS = [
         "q1",
@@ -36,7 +30,7 @@ class Executor:
         dimension = None
         period = None
 
-        for d in cls.DIMENSIONS:
+        for d in SemanticCatalog.get_dimensions():
             if d in question:
                 dimension = d
                 break

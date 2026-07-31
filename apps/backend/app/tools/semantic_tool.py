@@ -1,4 +1,4 @@
-from app.catalog.metrics import METRICS
+from app.catalog.catalog import SemanticCatalog
 from app.models.semantic import (
     MetricResponse,
     ComparisonResponse,
@@ -11,10 +11,10 @@ class SemanticTool:
 
         metric = metric.lower()
 
-        if metric not in METRICS:
+        if not SemanticCatalog.metric_exists(metric):
             return None
 
-        info = METRICS[metric]
+        info = SemanticCatalog.get_metric(metric)
 
         data = info["dimensions"]
 
@@ -27,25 +27,37 @@ class SemanticTool:
 
             region = data[dimension]
 
-            if period:
+            # Quarterly data
+            if isinstance(region, dict):
 
-                period = period.lower()
+                if period:
 
-                if period not in region:
-                    return None
+                    period = period.lower()
 
-                value = region[period]
+                    if period not in region:
+                        return None
 
+                    value = region[period]
+
+                else:
+
+                    value = sum(region.values())
+
+            # Yearly data
             else:
 
-                value = sum(region.values())
+                value = region
 
         else:
 
             value = 0
 
             for region in data.values():
-                value += sum(region.values())
+
+                if isinstance(region, dict):
+                    value += sum(region.values())
+                else:
+                    value += region
 
         return MetricResponse(
             metric=metric,
@@ -60,10 +72,10 @@ class SemanticTool:
 
         metric = metric.lower()
 
-        if metric not in METRICS:
+        if not SemanticCatalog.metric_exists(metric):
             return None
 
-        info = METRICS[metric]
+        info = SemanticCatalog.get_metric(metric)
 
         values = {}
 

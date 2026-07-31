@@ -11,7 +11,6 @@ class MetricMindAgent:
     def run(self, question: str):
 
         tool = Planner.choose_tool(question)
-
         comparison = Planner.is_comparison(question)
 
         context = ""
@@ -25,12 +24,23 @@ class MetricMindAgent:
 
             if result:
 
+                # ==========================
+                # Comparison Context
+                # ==========================
                 if comparison:
 
                     lines = []
 
                     for region, value in result.values.items():
-                        lines.append(f"{region}: {value} {result.unit}")
+
+                        if result.unit == "USD":
+                            formatted = f"${value:,.2f}"
+                        elif result.unit == "%":
+                            formatted = f"{value}%"
+                        else:
+                            formatted = str(value)
+
+                        lines.append(f"{region}: {formatted}")
 
                     context = f"""
 Business Comparison
@@ -42,7 +52,17 @@ Values:
 {chr(10).join(lines)}
 """
 
+                # ==========================
+                # Single Metric Context
+                # ==========================
                 else:
+
+                    if result.unit == "USD":
+                        formatted_value = f"${result.value:,.2f}"
+                    elif result.unit == "%":
+                        formatted_value = f"{result.value}%"
+                    else:
+                        formatted_value = str(result.value)
 
                     context = f"""
 Business Metric
@@ -60,11 +80,15 @@ Period:
 {result.period or "Full Year"}
 
 Value:
-{result.value}
+{formatted_value}
 
 Unit:
 {result.unit}
 """
+
+        print("\n========== CONTEXT SENT TO LLM ==========")
+        print(context)
+        print("=========================================\n")
 
         response = self.chain.invoke(
             {
