@@ -65,3 +65,35 @@ class Executor:
                 return tool_class.compare_metric(metric)
 
         return None
+    @classmethod
+    def rank(cls, tool, question):
+
+        tool_class = ToolRegistry.get_tool(tool)
+
+        if not tool_class:
+            return None
+
+        question = question.lower()
+
+        mode = "max"
+
+        lowest_keywords = [
+            "lowest",
+            "least",
+            "minimum",
+            "min",
+            "smallest",
+            "worst",
+        ]
+
+        for word in lowest_keywords:
+            if word in question:
+                mode = "min"
+                break
+
+        for metric in cls.METRICS:
+
+            if metric in question:
+                return tool_class.rank_metric(metric, mode)
+
+        return None

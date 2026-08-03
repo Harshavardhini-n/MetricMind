@@ -12,22 +12,79 @@ class MetricMindAgent:
 
         tool = Planner.choose_tool(question)
         comparison = Planner.is_comparison(question)
+        ranking = Planner.is_ranking(question)
 
         context = ""
 
         if tool:
 
-            if comparison:
+            if ranking:
+                result = Executor.rank(tool, question)
+
+            elif comparison:
                 result = Executor.compare(tool, question)
+
             else:
                 result = Executor.execute(tool, question)
 
             if result:
 
-                # ==========================
-                # Comparison Context
-                # ==========================
-                if comparison:
+                # ====================================
+                # BUSINESS RANKING
+                # ====================================
+
+                if ranking:
+    
+                    lines = []
+
+                    for i, (region, value) in enumerate(result["ranking"], start=1):
+
+                        if result["unit"] == "USD":
+                            formatted = f"${value:,.2f}"
+                        elif result["unit"] == "%":
+                            formatted = f"{value}%"
+                        else:
+                            formatted = str(value)
+
+                        lines.append(f"{i}. {region} — {formatted}")
+
+                    if result["unit"] == "USD":
+                        highest = f"${result['highest_value']:,.2f}"
+                        lowest = f"${result['lowest_value']:,.2f}"
+                    elif result["unit"] == "%":
+                        highest = f"{result['highest_value']}%"
+                        lowest = f"{result['lowest_value']}%"
+                    else:
+                        highest = str(result["highest_value"])
+                        lowest = str(result["lowest_value"])
+
+                    context = f"""
+Business Ranking
+
+Metric:
+{result["metric"]}
+
+Ranking:
+{chr(10).join(lines)}
+
+Highest Region:
+{result["highest_region"]}
+
+Highest Value:
+{highest}
+
+Lowest Region:
+{result["lowest_region"]}
+
+Lowest Value:
+{lowest}
+"""
+
+                # ====================================
+                # BUSINESS COMPARISON
+                # ====================================
+
+                elif comparison:
 
                     lines = []
 
@@ -49,20 +106,22 @@ Metric:
 {result.metric}
 
 Values:
+
 {chr(10).join(lines)}
 """
 
-                # ==========================
-                # Single Metric Context
-                # ==========================
+                # ====================================
+                # SINGLE METRIC
+                # ====================================
+
                 else:
 
                     if result.unit == "USD":
-                        formatted_value = f"${result.value:,.2f}"
+                        formatted = f"${result.value:,.2f}"
                     elif result.unit == "%":
-                        formatted_value = f"{result.value}%"
+                        formatted = f"{result.value}%"
                     else:
-                        formatted_value = str(result.value)
+                        formatted = str(result.value)
 
                     context = f"""
 Business Metric
@@ -80,7 +139,7 @@ Period:
 {result.period or "Full Year"}
 
 Value:
-{formatted_value}
+{formatted}
 
 Unit:
 {result.unit}
