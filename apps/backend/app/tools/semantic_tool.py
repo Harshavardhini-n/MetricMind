@@ -1,4 +1,5 @@
 from app.catalog.catalog import SemanticCatalog
+from app.providers.provider_factory import ProviderFactory
 from app.models.semantic import (
     MetricResponse,
     ComparisonResponse,
@@ -15,7 +16,9 @@ class SemanticTool:
         if not SemanticCatalog.metric_exists(metric):
             return None
 
-        info = SemanticCatalog.get_metric(metric)
+        provider = ProviderFactory.get_provider()
+
+        info = provider.get_metric(metric)
 
         data = info["dimensions"]
 
@@ -75,7 +78,8 @@ class SemanticTool:
         if not SemanticCatalog.metric_exists(metric):
             return None
 
-        info = SemanticCatalog.get_metric(metric)
+        provider = ProviderFactory.get_provider()
+        info = provider.get_metric(metric)
 
         values = {}
 
@@ -100,7 +104,8 @@ class SemanticTool:
         if not SemanticCatalog.metric_exists(metric):
             return None
 
-        info = SemanticCatalog.get_metric(metric)
+        provider = ProviderFactory.get_provider()
+        info = provider.get_metric(metric)
 
         values = {}
 
