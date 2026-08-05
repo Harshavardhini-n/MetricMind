@@ -14,6 +14,9 @@ class Settings(BaseSettings):
     OLLAMA_MODEL: str = "llama3"
     OLLAMA_HOST: str = "http://localhost:11434"
 
+    # NEW
+    DATA_PROVIDER: str = "catalog"
+
     CUBE_API_URL: str = ""
     CUBE_API_TOKEN: str = ""
 

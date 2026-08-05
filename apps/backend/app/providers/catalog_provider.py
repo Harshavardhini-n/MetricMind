@@ -1,9 +1,14 @@
-from app.catalog.catalog import SemanticCatalog
+from app.catalog.metrics import METRICS
 from app.providers.base_provider import BaseProvider
 
 
 class CatalogProvider(BaseProvider):
 
-    def get_metric(self, metric: str):
+    def metric_exists(self, metric):
+        return metric.lower() in METRICS
 
-        return SemanticCatalog.get_metric(metric)
+    def get_metric(self, metric):
+        return METRICS.get(metric.lower())
+
+    def list_metrics(self):
+        return list(METRICS.keys())
