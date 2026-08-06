@@ -1,3 +1,4 @@
+from app.catalog.dimensions import DIMENSIONS
 from app.providers.provider_factory import ProviderFactory
 
 
@@ -16,3 +17,7 @@ class SemanticCatalog:
     @classmethod
     def list_metrics(cls):
         return cls.provider.list_metrics()
+
+    @classmethod
+    def get_dimensions(cls):
+        return DIMENSIONS
