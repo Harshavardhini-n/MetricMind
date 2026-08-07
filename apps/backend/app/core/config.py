@@ -15,7 +15,7 @@ class Settings(BaseSettings):
     OLLAMA_HOST: str = "http://localhost:11434"
 
     # NEW
-    DATA_PROVIDER: str = "catalog"
+    DATA_PROVIDER: str = "snowflake"
 
     CUBE_API_URL: str = ""
     CUBE_API_TOKEN: str = ""
