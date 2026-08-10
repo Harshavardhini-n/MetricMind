@@ -1,5 +1,6 @@
 DIMENSIONS = [
-    "north america",
-    "europe",
-    "asia",
+    "west",
+    "east",
+    "central",
+    "south",
 ]
