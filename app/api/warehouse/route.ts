@@ -1,0 +1,2 @@
+import { NextResponse } from "next/server";import { snowflakeConfigured } from "@/lib/snowflake/client";
+export const runtime="nodejs";export async function GET(){const live=snowflakeConfigured();return NextResponse.json({success:true,data:{connected:live,warehouse:process.env.SNOWFLAKE_WAREHOUSE||"METRICMIND_DEMO",role:process.env.SNOWFLAKE_ROLE||"ANALYST",database:process.env.SNOWFLAKE_DATABASE||"DEMO_COMMERCE",schema:process.env.SNOWFLAKE_SCHEMA||"ANALYTICS",state:live?"Connection configured":"Demo mode"},meta:{demoMode:!live}})}

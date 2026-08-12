@@ -1,0 +1,1 @@
+import { NextResponse } from "next/server";export async function GET(){return NextResponse.json({success:true,data:{layouts:[],message:"Dashboard layouts persist in the browser until database persistence is configured."},meta:{demoMode:true}})}
