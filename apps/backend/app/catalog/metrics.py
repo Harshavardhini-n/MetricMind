@@ -1,56 +1,20 @@
 METRICS = {
+
     "revenue": {
         "description": "Total business revenue",
         "unit": "USD",
-        "dimensions": {
-            "north america": {
-                "q1": 210000,
-                "q2": 220000,
-                "q3": 230000,
-                "q4": 240000,
-            },
-            "europe": {
-                "q1": 150000,
-                "q2": 160000,
-                "q3": 170000,
-                "q4": 170000,
-            },
-            "asia": {
-                "q1": 70000,
-                "q2": 75000,
-                "q3": 80000,
-                "q4": 75000,
-            },
-        },
+        "source_column": "SALES",
     },
 
     "profit": {
-        "description": "Net profit",
+        "description": "Total business profit",
         "unit": "USD",
-        "dimensions": {
-            "north america": 320000,
-            "europe": 180000,
-            "asia": 100000
-        }
+        "source_column": "PROFIT",
     },
 
     "margin": {
-        "description": "Net profit margin",
+        "description": "Profit margin calculated as profit divided by sales",
         "unit": "%",
-        "dimensions": {
-            "north america": 35.5,
-            "europe": 28.1,
-            "asia": 22.4
-        }
+        "source_column": None,
     },
-
-    "cost": {
-        "description": "Operational cost",
-        "unit": "USD",
-        "dimensions": {
-            "north america": 580000,
-            "europe": 470000,
-            "asia": 200000
-        }
-    }
 }

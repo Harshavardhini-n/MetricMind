@@ -1,6 +1,6 @@
 DIMENSIONS = [
-    "west",
     "east",
-    "central",
+    "west",
     "south",
+    "central",
 ]

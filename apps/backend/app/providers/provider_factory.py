@@ -9,11 +9,13 @@ class ProviderFactory:
     @classmethod
     def get_provider(cls):
 
-        print("DATA_PROVIDER =", settings.DATA_PROVIDER)
+        provider = settings.DATA_PROVIDER.lower()
 
-        if settings.DATA_PROVIDER.lower() == "snowflake":
-            print(">>> USING SNOWFLAKE PROVIDER")
+        print("DATA_PROVIDER =", provider)
+
+        if provider == "snowflake":
+            print("USING SNOWFLAKE PROVIDER")
             return SnowflakeProvider()
 
-        print(">>> USING CATALOG PROVIDER")
+        print("USING CATALOG PROVIDER")
         return CatalogProvider()

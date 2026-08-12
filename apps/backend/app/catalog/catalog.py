@@ -1,23 +1,29 @@
+from app.catalog.metrics import METRICS
 from app.catalog.dimensions import DIMENSIONS
-from app.providers.provider_factory import ProviderFactory
 
 
 class SemanticCatalog:
 
-    provider = ProviderFactory.get_provider()
-
     @classmethod
     def metric_exists(cls, metric):
-        return cls.provider.metric_exists(metric)
+
+        return metric.lower() in METRICS
 
     @classmethod
     def get_metric(cls, metric):
-        return cls.provider.get_metric(metric)
+
+        return METRICS.get(
+            metric.lower()
+        )
 
     @classmethod
     def list_metrics(cls):
-        return cls.provider.list_metrics()
+
+        return list(
+            METRICS.keys()
+        )
 
     @classmethod
     def get_dimensions(cls):
+
         return DIMENSIONS

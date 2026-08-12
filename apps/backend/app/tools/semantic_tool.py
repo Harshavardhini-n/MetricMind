@@ -4,7 +4,12 @@ from app.providers.provider_factory import ProviderFactory
 class SemanticTool:
 
     @classmethod
-    def query_metric(cls, metric, dimension=None, period=None):
+    def query_metric(
+        cls,
+        metric,
+        dimension=None,
+        period=None,
+    ):
 
         provider = ProviderFactory.get_provider()
 
@@ -15,14 +20,23 @@ class SemanticTool:
         )
 
     @classmethod
-    def compare_metric(cls, metric):
+    def compare_metric(
+        cls,
+        metric,
+    ):
 
         provider = ProviderFactory.get_provider()
 
-        return provider.compare_metric(metric)
+        return provider.compare_metric(
+            metric
+        )
 
     @classmethod
-    def rank_metric(cls, metric, mode):
+    def rank_metric(
+        cls,
+        metric,
+        mode,
+    ):
 
         provider = ProviderFactory.get_provider()
 
