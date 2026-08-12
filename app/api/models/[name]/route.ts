@@ -1,0 +1,2 @@
+import { NextResponse } from "next/server";import { demoModels } from "@/lib/demo";
+export async function GET(_:Request,{params}:{params:Promise<{name:string}>}){const {name}=await params;const model=demoModels.find(m=>m.name===name.toUpperCase());return model?NextResponse.json({success:true,data:model,meta:{demoMode:true}}):NextResponse.json({success:false,error:{code:"NOT_FOUND",message:"Model not found"}},{status:404})}

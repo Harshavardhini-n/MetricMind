@@ -1,0 +1,1 @@
+import { NextResponse } from "next/server";import { snowflakeConfigured } from "@/lib/snowflake/client";export async function GET(){return NextResponse.json({success:true,data:{status:"ok",snowflakeConfigured:snowflakeConfigured()}})}

@@ -1,0 +1,3 @@
+import { NextResponse } from "next/server";import { z } from "zod";import { RuleBasedBIProvider } from "@/lib/providers/rule-based";import { snowflakeConfigured } from "@/lib/snowflake/client";
+export const runtime="nodejs";const schema=z.object({question:z.string().min(2).max(2000)});
+export async function POST(req:Request){try{const {question}=schema.parse(await req.json()),demoMode=!snowflakeConfigured();const response=await new RuleBasedBIProvider().ask(question,{demoMode});return NextResponse.json({success:true,data:response,meta:{demoMode,executionTimeMs:response.executionTime}})}catch(e){return NextResponse.json({success:false,error:{code:"CHAT_REQUEST_INVALID",message:e instanceof Error?e.message:"Unable to process request"}},{status:400})}}
