@@ -8,6 +8,7 @@ class Executor:
         "revenue": "revenue",
         "profit": "profit",
         "margin": "margin",
+        "cost": "cost",
     }
 
     PERIOD_MAP = {
@@ -52,12 +53,9 @@ class Executor:
 
         question = question.lower()
 
-        for dimension in (
-            SemanticCatalog.get_dimensions()
-        ):
+        for dimension in SemanticCatalog.get_dimensions():
 
             if dimension.lower() in question:
-
                 return dimension.lower()
 
         return None
@@ -71,12 +69,16 @@ class Executor:
 
         question = question.lower()
 
-        for phrase, period in (
-            cls.PERIOD_MAP.items()
-        ):
+        # Longer phrases first
+        periods = sorted(
+            cls.PERIOD_MAP.items(),
+            key=lambda item: len(item[0]),
+            reverse=True,
+        )
+
+        for phrase, period in periods:
 
             if phrase in question:
-
                 return period
 
         return None
@@ -89,30 +91,22 @@ class Executor:
     def execute(
         cls,
         tool,
-        question
+        question,
     ):
 
-        tool_class = ToolRegistry.get_tool(
-            tool
-        )
+        tool_class = ToolRegistry.get_tool(tool)
 
         if not tool_class:
             return None
 
-        metric = cls._extract_metric(
-            question
-        )
+        metric = cls._extract_metric(question)
 
         if not metric:
             return None
 
-        dimension = cls._extract_dimension(
-            question
-        )
+        dimension = cls._extract_dimension(question)
 
-        period = cls._extract_period(
-            question
-        )
+        period = cls._extract_period(question)
 
         print("========================================")
         print("EXECUTOR - SINGLE METRIC")
@@ -135,30 +129,30 @@ class Executor:
     def compare(
         cls,
         tool,
-        question
+        question,
     ):
 
-        tool_class = ToolRegistry.get_tool(
-            tool
-        )
+        tool_class = ToolRegistry.get_tool(tool)
 
         if not tool_class:
             return None
 
-        metric = cls._extract_metric(
-            question
-        )
+        metric = cls._extract_metric(question)
 
         if not metric:
             return None
 
+        period = cls._extract_period(question)
+
         print("========================================")
         print("EXECUTOR - COMPARISON")
         print("Metric:", metric)
+        print("Period:", period)
         print("========================================")
 
         return tool_class.compare_metric(
-            metric
+            metric=metric,
+            period=period,
         )
 
     # ==========================================================
@@ -169,24 +163,20 @@ class Executor:
     def rank(
         cls,
         tool,
-        question
+        question,
     ):
 
-        tool_class = ToolRegistry.get_tool(
-            tool
-        )
+        tool_class = ToolRegistry.get_tool(tool)
 
         if not tool_class:
             return None
 
-        metric = cls._extract_metric(
-            question
-        )
+        metric = cls._extract_metric(question)
 
         if not metric:
             return None
 
-        question = question.lower()
+        question_lower = question.lower()
 
         mode = "max"
 
@@ -197,22 +187,26 @@ class Executor:
             "min",
             "smallest",
             "worst",
+            "bottom",
         ]
 
         for word in lowest_keywords:
 
-            if word in question:
-
+            if word in question_lower:
                 mode = "min"
                 break
+
+        period = cls._extract_period(question)
 
         print("========================================")
         print("EXECUTOR - RANKING")
         print("Metric:", metric)
         print("Mode:", mode)
+        print("Period:", period)
         print("========================================")
 
         return tool_class.rank_metric(
-            metric,
-            mode
+            metric=metric,
+            mode=mode,
+            period=period,
         )

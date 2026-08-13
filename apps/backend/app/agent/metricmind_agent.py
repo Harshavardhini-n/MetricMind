@@ -16,7 +16,7 @@ class MetricMindAgent:
     @staticmethod
     def _format_value(
         value,
-        unit
+        unit,
     ):
 
         value = float(value)
@@ -32,12 +32,24 @@ class MetricMindAgent:
         return str(value)
 
     # ==========================================================
+    # PERIOD FORMATTER
+    # ==========================================================
+
+    @staticmethod
+    def _format_period(period):
+
+        if not period:
+            return "FULL YEAR"
+
+        return period.upper()
+
+    # ==========================================================
     # RUN
     # ==========================================================
 
     def run(
         self,
-        question: str
+        question: str,
     ):
 
         print("\n========================================")
@@ -80,7 +92,7 @@ class MetricMindAgent:
 
                 result = Executor.rank(
                     tool,
-                    question
+                    question,
                 )
 
             # ==================================================
@@ -91,7 +103,7 @@ class MetricMindAgent:
 
                 result = Executor.compare(
                     tool,
-                    question
+                    question,
                 )
 
             # ==================================================
@@ -102,7 +114,7 @@ class MetricMindAgent:
 
                 result = Executor.execute(
                     tool,
-                    question
+                    question,
                 )
 
             print("Backend result:", result)
@@ -123,16 +135,16 @@ class MetricMindAgent:
 
                     for index, (
                         region,
-                        value
+                        value,
                     ) in enumerate(
                         result["ranking"],
-                        start=1
+                        start=1,
                     ):
 
                         formatted = (
                             self._format_value(
                                 value,
-                                result["unit"]
+                                result["unit"],
                             )
                         )
 
@@ -142,52 +154,96 @@ class MetricMindAgent:
                             f"{formatted}"
                         )
 
-                    highest = (
+                    # ----------------------------------------------
+                    # REQUESTED WINNER
+                    # ----------------------------------------------
+
+                    mode = result.get(
+                        "mode",
+                        "max",
+                    )
+
+                    if mode == "min":
+
+                        selected_region = (
+                            result["lowest_region"]
+                        )
+
+                        selected_value = (
+                            result["lowest_value"]
+                        )
+
+                        ranking_type = "LOWEST"
+
+                    else:
+
+                        selected_region = (
+                            result["highest_region"]
+                        )
+
+                        selected_value = (
+                            result["highest_value"]
+                        )
+
+                        ranking_type = "HIGHEST"
+
+                    selected_value = (
                         self._format_value(
-                            result["highest_value"],
-                            result["unit"]
+                            selected_value,
+                            result["unit"],
                         )
                     )
 
-                    lowest = (
-                        self._format_value(
-                            result["lowest_value"],
-                            result["unit"]
-                        )
+                    period = self._format_period(
+                        result.get("period")
                     )
 
                     context = f"""
 BUSINESS DATA FROM SNOWFLAKE
 
 Type:
-Ranking
+Regional Ranking
 
 Metric:
 {result["metric"]}
 
-Ranking order:
+Period:
+{period}
+
+Requested ranking:
+{ranking_type}
+
+Selected region:
+{selected_region}
+
+Selected value:
+{selected_value}
+
+Full ranking:
 {chr(10).join(lines)}
-
-Highest region:
-{result["highest_region"]}
-
-Highest value:
-{highest}
-
-Lowest region:
-{result["lowest_region"]}
-
-Lowest value:
-{lowest}
 
 Unit:
 {result["unit"]}
 
 IMPORTANT:
 These values were retrieved directly from Snowflake.
-Use these values as the source of truth.
+
+Use these exact values as the source of truth.
+
+The requested ranking is:
+{ranking_type}
+
+The selected region is:
+{selected_region}
+
+The selected value is:
+{selected_value}
+
+Do not invent numerical values.
+
+Do not replace period-specific values with full-year values.
+
 Do not claim that regional data is unavailable.
-Do not invent other values.
 """
 
                 # ==================================================
@@ -205,7 +261,7 @@ Do not invent other values.
                         formatted = (
                             self._format_value(
                                 value,
-                                result["unit"]
+                                result["unit"],
                             )
                         )
 
@@ -213,6 +269,10 @@ Do not invent other values.
                             f"{region}: "
                             f"{formatted}"
                         )
+
+                    period = self._format_period(
+                        result.get("period")
+                    )
 
                     context = f"""
 BUSINESS DATA FROM SNOWFLAKE
@@ -222,6 +282,9 @@ Regional Comparison
 
 Metric:
 {result["metric"]}
+
+Period:
+{period}
 
 Regional values:
 {chr(10).join(lines)}
@@ -235,10 +298,18 @@ from Snowflake.
 
 Use these exact regional values to answer the user.
 
+The requested period is:
+{period}
+
 Do NOT say that regional data is unavailable.
+
 Do NOT say that additional regional data is required.
-Do NOT replace these values with a total.
+
+Do NOT replace these values with a full-year total.
+
 Do NOT invent values.
+
+Do NOT use values from another period.
 """
 
                 # ==================================================
@@ -250,7 +321,7 @@ Do NOT invent values.
                     formatted = (
                         self._format_value(
                             result["value"],
-                            result["unit"]
+                            result["unit"],
                         )
                     )
 
@@ -259,9 +330,8 @@ Do NOT invent values.
                         or "All Regions"
                     )
 
-                    period = (
+                    period = self._format_period(
                         result.get("period")
-                        or "Full Year"
                     )
 
                     context = f"""
@@ -280,7 +350,7 @@ Dimension:
 {dimension}
 
 Period:
-{period.upper() if result.get("period") else "FULL YEAR"}
+{period}
 
 Value:
 {formatted}
@@ -290,7 +360,13 @@ Unit:
 
 IMPORTANT:
 Use this value as the source of truth.
+
 Do not invent another value.
+
+Do not replace a period-specific value with a full-year value.
+
+Do not claim that the requested metric is unavailable
+when a value is present.
 """
 
         # ======================================================
@@ -303,17 +379,24 @@ Do not invent another value.
 No business data was retrieved from Snowflake.
 
 Do not invent a numerical answer.
+
 Clearly state that the requested metric could not
-be retrieved.
+be retrieved from the available business data.
 """
 
         # ======================================================
         # DEBUG
         # ======================================================
 
-        print("\n========== CONTEXT SENT TO LLM ==========")
+        print(
+            "\n========== CONTEXT SENT TO LLM =========="
+        )
+
         print(context)
-        print("==========================================\n")
+
+        print(
+            "==========================================\n"
+        )
 
         # ======================================================
         # LLM
@@ -327,7 +410,11 @@ be retrieved.
         )
 
         print("LLM RESPONSE:")
+
         print(response.content)
-        print("========================================\n")
+
+        print(
+            "========================================\n"
+        )
 
         return response.content

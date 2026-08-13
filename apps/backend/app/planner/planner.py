@@ -12,15 +12,17 @@ class Planner:
     COMPARISON_KEYWORDS = [
         "compare",
         "comparison",
+        "across regions",
+        "by region",
+        "per region",
+        "each region",
+        "every region",
+        "regions",
         "versus",
         "vs",
-        "highest",
-        "lowest",
-        "greater",
-        "less",
-        "better",
-        "worse",
+        "between",
     ]
+    
 
     @classmethod
     def choose_tool(cls, question: str):
@@ -55,6 +57,10 @@ class Planner:
             "worst",
             "top",
             "bottom",
+            "max",
+            "min",
+            "largest",
+            "smallest",
         ]
 
         question = question.lower()

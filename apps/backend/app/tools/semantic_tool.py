@@ -23,12 +23,14 @@ class SemanticTool:
     def compare_metric(
         cls,
         metric,
+        period=None,
     ):
 
         provider = ProviderFactory.get_provider()
 
         return provider.compare_metric(
-            metric
+            metric=metric,
+            period=period,
         )
 
     @classmethod
@@ -36,11 +38,13 @@ class SemanticTool:
         cls,
         metric,
         mode,
+        period=None,
     ):
 
         provider = ProviderFactory.get_provider()
 
         return provider.rank_metric(
-            metric,
-            mode,
+            metric=metric,
+            mode=mode,
+            period=period,
         )

@@ -66,7 +66,7 @@ class SnowflakeProvider(BaseProvider):
             return None
 
         return {
-            "metric": metric
+            "metric": metric,
         }
 
     def list_metrics(self):
@@ -88,13 +88,13 @@ class SnowflakeProvider(BaseProvider):
 
         metric_map = {
 
-            # Revenue = SALES
+            # Revenue
             "revenue": "SUM(SALES)",
 
-            # Profit is directly available
+            # Profit
             "profit": "SUM(PROFIT)",
 
-            # Profit margin = Profit / Sales
+            # Profit Margin
             "margin": """
                 CASE
                     WHEN SUM(SALES) = 0 THEN 0
@@ -102,7 +102,7 @@ class SnowflakeProvider(BaseProvider):
                 END
             """,
 
-            # Cost = Sales - Profit
+            # Cost
             "cost": "SUM(SALES) - SUM(PROFIT)",
         }
 
@@ -120,6 +120,39 @@ class SnowflakeProvider(BaseProvider):
         return "USD"
 
     # ==========================================================
+    # QUARTER CONDITION
+    # ==========================================================
+
+    def _add_period_condition(
+        self,
+        conditions,
+        params,
+        period,
+    ):
+
+        if not period:
+            return
+
+        quarter_map = {
+            "q1": 1,
+            "q2": 2,
+            "q3": 3,
+            "q4": 4,
+        }
+
+        quarter = quarter_map.get(
+            period.lower()
+        )
+
+        if quarter:
+
+            conditions.append(
+                "QUARTER(TO_DATE(ORDER_DATE)) = %s"
+            )
+
+            params.append(quarter)
+
+    # ==========================================================
     # SINGLE METRIC
     # ==========================================================
 
@@ -127,7 +160,7 @@ class SnowflakeProvider(BaseProvider):
         self,
         metric,
         dimension=None,
-        period=None
+        period=None,
     ):
 
         metric = metric.lower()
@@ -156,9 +189,8 @@ class SnowflakeProvider(BaseProvider):
             FROM SALES_ORDERS
         """
 
-        params = []
-
         conditions = []
+        params = []
 
         # ------------------------------------------------------
         # REGION
@@ -176,26 +208,11 @@ class SnowflakeProvider(BaseProvider):
         # QUARTER
         # ------------------------------------------------------
 
-        if period:
-
-            quarter_map = {
-                "q1": 1,
-                "q2": 2,
-                "q3": 3,
-                "q4": 4,
-            }
-
-            quarter = quarter_map.get(
-                period.lower()
-            )
-
-            if quarter:
-
-                conditions.append(
-                    "QUARTER(TO_DATE(ORDER_DATE)) = %s"
-                )
-
-                params.append(quarter)
+        self._add_period_condition(
+            conditions,
+            params,
+            period,
+        )
 
         # ------------------------------------------------------
         # WHERE
@@ -214,7 +231,7 @@ class SnowflakeProvider(BaseProvider):
 
         rows = self.execute(
             sql,
-            params
+            params,
         )
 
         if not rows:
@@ -266,14 +283,18 @@ class SnowflakeProvider(BaseProvider):
 
         return descriptions.get(
             metric,
-            f"Total {metric.title()}"
+            f"Total {metric.title()}",
         )
 
     # ==========================================================
     # COMPARE ACROSS REGIONS
     # ==========================================================
 
-    def compare_metric(self, metric):
+    def compare_metric(
+        self,
+        metric,
+        period=None,
+    ):
 
         metric = metric.lower()
 
@@ -290,11 +311,41 @@ class SnowflakeProvider(BaseProvider):
                     0
                 ) AS VALUE
             FROM SALES_ORDERS
-            GROUP BY REGION
-            ORDER BY REGION
         """
 
-        rows = self.execute(sql)
+        conditions = []
+        params = []
+
+        # ------------------------------------------------------
+        # QUARTER
+        # ------------------------------------------------------
+
+        self._add_period_condition(
+            conditions,
+            params,
+            period,
+        )
+
+        if conditions:
+
+            sql += (
+                " WHERE "
+                + " AND ".join(conditions)
+            )
+
+        # ------------------------------------------------------
+        # GROUP
+        # ------------------------------------------------------
+
+        sql += """
+            GROUP BY REGION
+            ORDER BY VALUE DESC
+        """
+
+        rows = self.execute(
+            sql,
+            params,
+        )
 
         values = {}
 
@@ -312,13 +363,19 @@ class SnowflakeProvider(BaseProvider):
             "metric": metric,
             "unit": self._get_metric_unit(metric),
             "values": values,
+            "period": period,
         }
 
     # ==========================================================
     # RANK ACROSS REGIONS
     # ==========================================================
 
-    def rank_metric(self, metric, mode):
+    def rank_metric(
+        self,
+        metric,
+        mode,
+        period=None,
+    ):
 
         metric = metric.lower()
 
@@ -327,10 +384,7 @@ class SnowflakeProvider(BaseProvider):
         if not expression:
             return None
 
-        direction = "DESC"
-
-        if mode == "min":
-            direction = "ASC"
+        direction = "ASC" if mode == "min" else "DESC"
 
         sql = f"""
             SELECT
@@ -340,11 +394,41 @@ class SnowflakeProvider(BaseProvider):
                     0
                 ) AS VALUE
             FROM SALES_ORDERS
+        """
+
+        conditions = []
+        params = []
+
+        # ------------------------------------------------------
+        # QUARTER
+        # ------------------------------------------------------
+
+        self._add_period_condition(
+            conditions,
+            params,
+            period,
+        )
+
+        if conditions:
+
+            sql += (
+                " WHERE "
+                + " AND ".join(conditions)
+            )
+
+        # ------------------------------------------------------
+        # RANKING
+        # ------------------------------------------------------
+
+        sql += f"""
             GROUP BY REGION
             ORDER BY VALUE {direction}
         """
 
-        rows = self.execute(sql)
+        rows = self.execute(
+            sql,
+            params,
+        )
 
         ranking = []
 
@@ -356,21 +440,47 @@ class SnowflakeProvider(BaseProvider):
             ranking.append(
                 (
                     str(region),
-                    float(value)
+                    float(value),
                 )
             )
 
         if not ranking:
             return None
 
+        # The first result is the requested winner.
+        selected_region = ranking[0][0]
+        selected_value = ranking[0][1]
+
+        opposite_region = ranking[-1][0]
+        opposite_value = ranking[-1][1]
+
+        if mode == "min":
+
+            lowest_region = selected_region
+            lowest_value = selected_value
+
+            highest_region = opposite_region
+            highest_value = opposite_value
+
+        else:
+
+            highest_region = selected_region
+            highest_value = selected_value
+
+            lowest_region = opposite_region
+            lowest_value = opposite_value
+
         return {
             "metric": metric,
             "unit": self._get_metric_unit(metric),
             "ranking": ranking,
 
-            "highest_region": ranking[0][0],
-            "highest_value": ranking[0][1],
+            "highest_region": highest_region,
+            "highest_value": highest_value,
 
-            "lowest_region": ranking[-1][0],
-            "lowest_value": ranking[-1][1],
+            "lowest_region": lowest_region,
+            "lowest_value": lowest_value,
+
+            "mode": mode,
+            "period": period,
         }
