@@ -4,16 +4,24 @@ from app.providers.snowflake_provider import SnowflakeProvider
 
 class ProviderFactory:
 
-    @staticmethod
-    def get_provider():
+    _provider = None
+
+    @classmethod
+    def get_provider(cls):
 
         provider = settings.DATA_PROVIDER.lower()
 
         if provider == "snowflake":
 
-            print(">>> USING SNOWFLAKE PROVIDER")
+            if cls._provider is None:
+                print(">>> INITIALIZING SNOWFLAKE PROVIDER")
 
-            return SnowflakeProvider()
+                cls._provider = SnowflakeProvider()
+
+            else:
+                print(">>> REUSING SNOWFLAKE PROVIDER")
+
+            return cls._provider
 
         raise ValueError(
             f"Unsupported data provider: {provider}"

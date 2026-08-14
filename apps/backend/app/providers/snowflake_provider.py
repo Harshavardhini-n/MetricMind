@@ -23,7 +23,11 @@ class SnowflakeProvider(BaseProvider):
     # GENERIC SQL EXECUTION
     # ==========================================================
 
-    def execute(self, query, params=None):
+    def execute(
+        self,
+        query,
+        params=None,
+    ):
 
         cursor = self.conn.cursor()
 
@@ -35,7 +39,10 @@ class SnowflakeProvider(BaseProvider):
             print("=====================================\n")
 
             if params:
-                cursor.execute(query, params)
+                cursor.execute(
+                    query,
+                    params,
+                )
             else:
                 cursor.execute(query)
 
