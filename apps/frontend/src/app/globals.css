@@ -1387,7 +1387,7 @@ button:focus-visible {
 .query-input textarea {
   flex: 1;
 
-  min-height: 42px;
+  min-height: 40px;
 
   resize: none;
 
@@ -1413,13 +1413,9 @@ button:focus-visible {
   height: 42px;
 
   flex-shrink: 0;
-
   border: 0;
-
   border-radius: 9px;
-
   background: #4d3fd0;
-
   color: white;
 
   cursor: pointer;
